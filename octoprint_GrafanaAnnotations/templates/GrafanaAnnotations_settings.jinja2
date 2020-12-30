@@ -1,0 +1,58 @@
+<form class="form-horizontal">
+	<fieldset>
+		<legend>{{ _('Grafana Server') }}</legend>
+		<div class="control-group">
+			<label class="control-label">{{ _('Grafana Server URL') }}</label>
+			<div class="controls">
+				<input type="text" class="input-block-level" data-bind="value: settings.plugins.GrafanaAnnotations.url">
+				<span class="help-block">{{ _('The base URL of your Grafana server') }} </span>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label">{{ _('API Key') }}</label>
+			<div class="controls">
+				<input type="text" class="input-block-level" data-bind="value: settings.plugins.GrafanaAnnotations.api_key">
+				<span class="help-block">{{ _('Generate an API key in the Grafana settings page and paste it here') }} </span>
+			</div>
+		</div>
+	</fieldset>
+	<fieldset>
+		<legend>{{ _('Annotations')}}</legend>
+
+		<div class="control-group">
+			<label class="control-label">{{ _('Dashboard ID') }}</label>
+			<div class="controls">
+				<input type="text" class="input-block-level" data-bind="value: settings.plugins.GrafanaAnnotations.dashboard_id">
+				<span class="help-block">{{ _('Optionally target this annotation to a specific dashboard') }} </span>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label">{{ _('Panel ID') }}</label>
+			<div class="controls">
+				<input type="text" class="input-block-level" data-bind="value: settings.plugins.GrafanaAnnotations.panel_id">
+				<span class="help-block">{{ _('Optionally target this annotation to a specific panel on the above-specified dashboard') }} </span>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label">{{ _('Unconditional Tags') }}</label>
+			<div class="controls">
+				<input type="text" class="input-block-level" data-bind="value: settings.plugins.GrafanaAnnotations.tags">
+				<span class="help-block">{{ _('Comma-separated list of tags to send on every annotation, including in-progress prints') }} </span>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label">{{ _('Successful Print Tags (Comma Separated)') }}</label>
+			<div class="controls">
+				<input type="text" class="input-block-level" data-bind="value: settings.plugins.GrafanaAnnotations.successTags">
+				<span class="help-block">{{ _('Comma-separated list of tags to send when a print completes successfully') }} </span>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label">{{ _('Failed Print Tags (Comma Separated)') }}</label>
+			<div class="controls">
+				<input type="text" class="input-block-level" data-bind="value: settings.plugins.GrafanaAnnotations.failTags">
+				<span class="help-block">{{ _('Comma-separated list of tags to send when a print fails') }} </span>
+			</div>
+		</div>
+	</fieldset>
+</form>
