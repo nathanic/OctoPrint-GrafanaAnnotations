@@ -1,20 +1,16 @@
 OctoPrint Grafana Annotations Plugin
 =====================================
 
-Send [Annotations](https://grafana.com/docs/grafana/latest/dashboards/annotations/)
-to Grafana to mark the begin and end times of your print jobs.  
+Send Annotations to Grafana to mark the begin and end times of your print jobs.  
 
-Annotations are timed event markers that can either be a discrete point in
-time, or be a range with a beginning and an end.  They can also have text, and support tags so
-you can query them in your dashboards and overlay them onto your time series
-plots.  You can create them manually, but there's an
-[API](https://grafana.com/docs/grafana/latest/http_api/annotations/) for that.
+[Annotations](https://grafana.com/docs/grafana/latest/dashboards/annotations/)
+are timed event markers that can either be a discrete point in time, or be
+a range with a beginning and an end.  They can also have description text, and support tags
+so you can query them in your dashboards and overlay them onto your time series
+plots.  
 
-I use the [OctoPrint Prometheus Exporter](https://github.com/tg44/OctoPrint-Prometheus-Exporter) plugin to
-gather stats from my prints into [Prometheus](https://prometheus.io/), and
-I use [Grafana](https://grafana.com/) to view them.  This plugin directly
-communicates with Grafana to create timed annotations for the print jobs, which
-I can overlay onto the other plots.
+This plugin goes great with the [OctoPrint Prometheus Exporter](https://github.com/tg44/OctoPrint-Prometheus-Exporter) 
+plugin, which can give you time series data about temperatures etc. to put on your fancy dashboards as a backdrop for these annotations.
 
 Operation
 ---------
@@ -34,3 +30,7 @@ You'll have to go into your Grafana settings page to generate an API key for thi
 It is also highly recommended that you fill in some tags to send on the annotations that identify 
 the printer etc. in case you have multiple printers.
 
+References
+----------
+ - [OctoPrint Plugin Tutorial](https://docs.octoprint.org/en/master/plugins/gettingstarted.html)
+ - [Grafana Annotations HTTP API](https://grafana.com/docs/grafana/latest/http_api/annotations/) 
