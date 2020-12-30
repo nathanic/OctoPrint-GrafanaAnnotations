@@ -32,7 +32,7 @@ class GrafanaAnnotationsPlugin(octoprint.plugin.EventHandlerPlugin,
 
     def get_template_configs(self):
         return [
-            dict(type="settings", custom_bindings=False)
+            dict(type="settings", name="Grafana Annotations", custom_bindings=False)
         ]
 
     def on_event(self, event, payload):
@@ -45,6 +45,18 @@ class GrafanaAnnotationsPlugin(octoprint.plugin.EventHandlerPlugin,
             self.end_print_annotation(True, payload)
         # do we care about PRINT_PAUSED/RESUMED ?
 
+    def get_update_information(self):
+        return dict(
+                GrafanaAnnotations=dict(
+                    displayName="Grafana Annotations",
+                    displayVersion=self._plugin_version,
+                    type="github_release",
+                    user="nathanic",
+                    repo="OctoPrint-Printoid",
+                    current=self._plugin_version,
+                    pip="https://github.com/nathanic/OctoPrint-GrafanaAnnotations/archive/{target_version}.zip"
+                )
+            )
 
     ############################ 
     ## Santa's Little Helpers
@@ -118,3 +130,6 @@ def unixtime_to_javatime(t):
 
 __plugin_implementation__ = GrafanaAnnotationsPlugin()
 __plugin_pythoncompat__ = ">=2.7,<4"
+__plugin_hooks__ = {
+        "octoprint.plugin.softwareupdate.check_config": get_update_information
+    }

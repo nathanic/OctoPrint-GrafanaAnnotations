@@ -32,12 +32,12 @@ Install the plugin via the Plugin Manager or manually using this URL:
 Settings
 -------------
 
+The settings are pretty much documented on the settings page, and I'm lazy, so here's a screenshot.
+
 ![screenshot](settings.png)
 
-You'll have to go into your Grafana settings page to generate an API key for this plugin to use.
-
-It is also highly recommended that you fill in some tags to send on the annotations that identify 
-the printer etc. in case you have multiple printers.
+It is strongly suggested that you add an unconditional tag that identifies
+which printer is responsible if you have more than one machine.
 
 References
 ----------
