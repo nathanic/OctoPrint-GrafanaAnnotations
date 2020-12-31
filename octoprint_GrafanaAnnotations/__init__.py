@@ -7,9 +7,6 @@ from octoprint.events import Events
 # requests lib seems to be part of base octoprint
 import requests
 import time
-from urllib.parse import urlparse
-
-TIMEOUT=5
 
 class GrafanaAnnotationsPlugin(octoprint.plugin.EventHandlerPlugin,
                               octoprint.plugin.TemplatePlugin,
@@ -20,15 +17,16 @@ class GrafanaAnnotationsPlugin(octoprint.plugin.EventHandlerPlugin,
     ##############
     ## Overrides
     ##############
-    
+
     def get_settings_defaults(self):
-        return dict(url='https://mygrafana:3000', 
+        return dict(url='https://mygrafana:3000',
                 api_key='changeme',
-                dashboard_id='', 
+                dashboard_id='',
                 panel_id='',
                 tags='printjob, printer_mk3s',
                 successTags='printjob_succeeded',
-                failTags='printjob_failed')
+                failTags='printjob_failed',
+                http_timeout=5)
 
     def get_template_configs(self):
         return [
@@ -58,9 +56,9 @@ class GrafanaAnnotationsPlugin(octoprint.plugin.EventHandlerPlugin,
                 )
             )
 
-    ############################ 
+    ############################
     ## Santa's Little Helpers
-    ############################ 
+    ############################
 
     def begin_print_annotation(self, payload):
         # this bit was inspired by grafannotate
@@ -71,25 +69,24 @@ class GrafanaAnnotationsPlugin(octoprint.plugin.EventHandlerPlugin,
                 }
         self._logger.info(self._settings.get(['url']))
         if self._settings.get(['dashboard_id']) != '':
-            ann['dashboardId'] = self._settings.get(['dashboard_id']) 
+            ann['dashboardId'] = self._settings.get(['dashboard_id'])
         if self._settings.get(['panel_id']) != '':
-            ann['panelId'] = self._settings.get(['panel_id']) 
+            ann['panelId'] = self._settings.get(['panel_id'])
 
         self._logger.info('Creating Grafana Annotation with content %s' % (ann))
-        response = requests.post(self.get_api_url(), json=ann, headers=self.get_headers(), timeout=TIMEOUT)
+        response = requests.post(self.get_api_url(), json=ann, headers=self.get_headers(), timeout=self._settings.get_int(['http_timeout']))
 
         if response.ok:
             result = response.json()
-
             if 'id' in result:
                 self.currentAnnotationId = result['id']
-            if result['message']:
-                self._logger.info(result['message'])
+            if 'message' in result:
+                self._logger.debug('Response from Grafana: %s' % result['message'])
             self._logger.info('Grafana Annotation has ID %s' % self.currentAnnotationId)
         else:
             self._logger.error('Failed posting to grafana with response %s' % response.json)
 
-    # patch the current tag with the end time information and outcome tags
+    # patch the current annotation with the end time information and outcome tags
     def end_print_annotation(self, success, payload):
         if self.currentAnnotationId is None:
             # this will normally happen for a cancel, when Done gets called after
@@ -97,12 +94,12 @@ class GrafanaAnnotationsPlugin(octoprint.plugin.EventHandlerPlugin,
             return
 
         end_time = time.time()
-        ann = { 'time': unixtime_to_javatime(end_time - payload['time']), 
-                'timeEnd': unixtime_to_javatime(end_time), 
+        ann = { 'time': unixtime_to_javatime(end_time - payload['time']),
+                'timeEnd': unixtime_to_javatime(end_time),
                 'tags': self.get_tags(success) }
         self._logger.info('Patching Grafana Annotation ID %d with content %s' % (self.currentAnnotationId, ann))
-        url = '%s/%d' % (self.get_api_url(), self.currentAnnotationId) 
-        response = requests.patch(url, headers=self.get_headers(), json=ann, timeout=TIMEOUT)
+        url = '%s/%d' % (self.get_api_url(), self.currentAnnotationId)
+        response = requests.patch(url, headers=self.get_headers(), json=ann, timeout=self._settings.get_int(['http_timeout']))
         self.currentAnnotationId = None
         self._logger.info('Grafana Annotation API Response: %s' % response.json())
 
@@ -111,6 +108,7 @@ class GrafanaAnnotationsPlugin(octoprint.plugin.EventHandlerPlugin,
                  'Accept': 'application/json',
                  'Content-Type': 'application/json'
                 }
+
     def get_api_url(self):
         return self._settings.get(['url']) + '/api/annotations'
 
@@ -128,8 +126,11 @@ def splip(s):
 def unixtime_to_javatime(t):
     return int(round( t * 1000))
 
-__plugin_implementation__ = GrafanaAnnotationsPlugin()
 __plugin_pythoncompat__ = ">=2.7,<4"
-__plugin_hooks__ = {
-        "octoprint.plugin.softwareupdate.check_config": get_update_information
+def __plugin_load__():
+    global __plugin_implementation__
+    __plugin_implementation__ = GrafanaAnnotationsPlugin()
+    global __plugin_hooks__
+    __plugin_hooks__ = {
+        "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information
     }
