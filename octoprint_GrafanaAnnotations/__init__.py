@@ -63,7 +63,7 @@ class GrafanaAnnotationsPlugin(octoprint.plugin.EventHandlerPlugin,
     def begin_print_annotation(self, payload):
         # this bit was inspired by grafannotate
         # https://github.com/devopsmakers/python-grafannotate
-        ann = {'text': 'Print of %s' % payload['path'],
+        ann = {'text': self.get_text(payload),
                 'time': int(round(time.time() * 1000)),
                 'tags': self.get_tags()
                 }
@@ -94,7 +94,8 @@ class GrafanaAnnotationsPlugin(octoprint.plugin.EventHandlerPlugin,
             return
 
         end_time = time.time()
-        ann = { 'time': unixtime_to_javatime(end_time - payload['time']),
+        ann = { 'text': self.get_text(payload, success),
+                'time': unixtime_to_javatime(end_time - payload['time']),
                 'timeEnd': unixtime_to_javatime(end_time),
                 'tags': self.get_tags(success) }
         self._logger.info('Patching Grafana Annotation ID %d with content %s' % (self.currentAnnotationId, ann))
@@ -102,6 +103,14 @@ class GrafanaAnnotationsPlugin(octoprint.plugin.EventHandlerPlugin,
         response = requests.patch(url, headers=self.get_headers(), json=ann, timeout=self._settings.get_int(['http_timeout']))
         self.currentAnnotationId = None
         self._logger.info('Grafana Annotation API Response: %s' % response.json())
+
+    def get_text(self, payload, success=None):
+        if success == True:
+            return "Successfully printed <pre>%s</pre> (%d bytes)." % (payload['path'], payload['size'])
+        elif success == False:
+            return "Failed print of <pre>%s</pre> (%d bytes)." % (payload['path'], payload['size'])
+        else:
+            return "Started print of <pre>%s</pre> (%d bytes)." % (payload['path'], payload['size'])
 
     def get_headers(self):
         return { 'Authorization': 'Bearer ' + self._settings.get(['api_key']),
